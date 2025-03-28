@@ -87,18 +87,17 @@ def project_list(request, ownership_filter=None):
         open_issue_count=models.Count('issue', filter=models.Q(issue__is_resolved=False, issue__is_muted=False)),
         member_count=models.Count(
             'projectmembership', distinct=True, filter=models.Q(projectmembership__accepted=True)),
-    ).select_related('team')
+    ).select_related('team').prefetch_related(
+        models.Prefetch(
+            'projectmembership_set',
+            queryset=ProjectMembership.objects.filter(user=request.user),
+            to_attr='user_memberships'
+        )
+    )
 
     if ownership_filter == "mine":
-        # Perhaps there's some Django-native way of doing this, but I can't figure it out soon enough, and this also
-        # works:
-        my_memberships_dict = {m.project_id: m for m in my_memberships}
-
-        project_list_2 = []
         for project in project_list:
-            project.member = my_memberships_dict.get(project.id)
-            project_list_2.append(project)
-        project_list = project_list_2
+            project.member = project.user_memberships[0] if project.user_memberships else None
 
     return render(request, 'projects/project_list.html', {
         'can_create':

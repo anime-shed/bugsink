@@ -239,17 +239,15 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-# > Instead of only picking up files collected into STATIC_ROOT, find and serve files in their original directories
-# > using Django’s “finders” API. [..] It’s also possible to use this setting in production, avoiding the need to run
-# > the collectstatic command during the build, so long as you do not wish to use any of the caching and compression
-# > features provided by the storage backends.
-#
-# Reasons to enable this in production:
-#
-# * Simplicity-as-a-core-value: yet another step we can remove from the install/upgrade process
-# * We don't use the mentioned features (caching, compression)
-# * The performance-impact of this setting only hits the GUI, which is the least performance-sensitive part anyway
+# Configure WhiteNoise for optimal static file caching
 WHITENOISE_USE_FINDERS = True
+WHITENOISE_MAX_AGE = 31536000  # 1 year
+WHITENOISE_IMMUTABLE_FILE_TEST = lambda path, url: url.startswith('/static/') and (
+    url.endswith('.css') or
+    url.endswith('.js') or
+    url.endswith('.webp') or
+    url.endswith('.woff2')
+)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
