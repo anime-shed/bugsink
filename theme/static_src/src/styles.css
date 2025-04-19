@@ -228,3 +228,8 @@ input[type='radio'] {
 button[name="action"][value="delete"] {
     @apply bg-red-500 text-white border-2 border-red-600 hover:bg-red-600 active:ring;
 }
+
+/* Height classes */
+.h-1\/2 {
+    height: 50%;
+}
