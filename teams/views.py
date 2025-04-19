@@ -122,8 +122,17 @@ def team_edit(request, team_pk):
         raise PermissionDenied("You are not an admin of this team")
 
     if request.method == 'POST':
-        form = TeamForm(request.POST, instance=team)
+        action = request.POST.get('action')
 
+        if action == 'delete':
+            # Delete all associated projects first
+            team.project_set.all().delete()
+            # Delete the team itself
+            team.delete()
+            messages.success(request, f'Team "{team.name}" has been deleted successfully.')
+            return redirect('team_list')
+
+        form = TeamForm(request.POST, instance=team)
         if form.is_valid():
             form.save()
             return redirect('team_members', team_pk=team.id)

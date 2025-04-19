@@ -24,8 +24,15 @@
         {% tailwind_formfield form.name %}
         {% tailwind_formfield form.visibility %}
 
-        <button name="action" value="invite" class="font-bold text-slate-800 border-slate-500 pl-4 pr-4 pb-2 pt-2 border-2 bg-cyan-200 hover:bg-cyan-400 active:ring rounded-md">Save</button>
-        <a href="{% url "team_list" %}" class="text-cyan-500 font-bold ml-2">Cancel</a>
+        <div class="flex items-center justify-between mt-4">
+            <div>
+                <button name="action" value="save" class="font-bold text-slate-800 border-slate-500 pl-4 pr-4 pb-2 pt-2 border-2 bg-cyan-200 hover:bg-cyan-400 active:ring rounded-md">Save</button>
+                <a href="{% url "team_list" %}" class="text-cyan-500 font-bold ml-2">Cancel</a>
+            </div>
+            <div>
+                <button name="action" value="delete" class="font-bold text-white bg-red-500 pl-4 pr-4 pb-2 pt-2 border-2 border-red-600 hover:bg-red-600 active:ring rounded-md" onclick="return confirm('Are you sure you want to delete this team? This action cannot be undone and will delete all associated projects and data.')">Delete Team</button>
+            </div>
+        </div>
         </form>
 
     </div>
