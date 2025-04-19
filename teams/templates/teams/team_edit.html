@@ -18,7 +18,11 @@
             </div>
             <div class="flex items-center justify-center space-x-4 mb-4">
                 <button id="cancelDelete" class="text-cyan-500 font-bold">Cancel</button>
-                <button id="confirmDelete" class="btn btn-danger">Confirm</button>
+                <form method="post" action="." id="deleteForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete">
+                    <button type="submit" class="btn btn-danger">Confirm</button>
+                </form>
             </div>
         </div>
     </div>
@@ -49,31 +53,11 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const modal = document.getElementById('deleteModal');
-        const deleteBtn = document.getElementById('deleteButton');
-        const confirmBtn = document.getElementById('confirmDelete');
-        const cancelBtn = document.getElementById('cancelDelete');
-        const form = document.getElementById('teamForm');
-
-        deleteBtn.addEventListener('click', () => {
-            modal.classList.remove('hidden');
-        });
-
-        cancelBtn.addEventListener('click', () => {
-            modal.classList.add('hidden');
-        });
-
-        confirmBtn.addEventListener('click', () => {
-            const deleteInput = document.createElement('input');
-            deleteInput.type = 'hidden';
-            deleteInput.name = 'action';
-            deleteInput.value = 'delete';
-            form.appendChild(deleteInput);
-            form.submit();
-        });
-    });
+    var csrftoken = '{{ csrf_token }}';
 </script>
-
+<script src="{% static 'js/entity_edit.js' %}"></script>
 {% endblock %}
