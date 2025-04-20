@@ -210,26 +210,3 @@ input[type='radio'] {
     do generally but I didn't manage to get it done in the self-allotted time. I'm still seeing a navy outer ring */
     color: rgb(6 182 212);  /* cyan-500 */
 }
-
-/* Custom button styles */
-.btn {
-    @apply font-bold py-2 px-4 rounded;
-}
-
-.btn-primary {
-    @apply bg-cyan-200 text-slate-800 border-2 border-slate-500 hover:bg-cyan-400 active:ring;
-}
-
-.btn-danger {
-    @apply bg-red-500 text-white border-2 border-red-600 hover:bg-red-600 active:ring;
-}
-
-/* Ensure delete button has proper styling */
-button[name="action"][value="delete"] {
-    @apply bg-red-500 text-white border-2 border-red-600 hover:bg-red-600 active:ring;
-}
-
-/* Height classes */
-.h-1\/2 {
-    height: 50%;
-}

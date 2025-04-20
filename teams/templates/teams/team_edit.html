@@ -21,7 +21,7 @@
                 <form method="post" action="." id="deleteForm">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="delete">
-                    <button type="submit" class="btn btn-danger">Confirm</button>
+                    <button type="submit" class="font-bold py-2 px-4 rounded bg-red-500 text-white border-2 border-red-600 hover:bg-red-600 active:ring">Confirm</button>
                 </form>
             </div>
         </div>
@@ -45,9 +45,9 @@
         {% tailwind_formfield form.visibility %}
 
         <div class="flex items-center mt-4">
-            <button name="action" value="save" class="btn btn-primary">Save</button>
+            <button name="action" value="save" class="font-bold py-2 px-4 rounded bg-cyan-200 text-slate-800 border-2 border-slate-500 hover:bg-cyan-400 active:ring">Save</button>
             <a href="{% url "team_list" %}" class="text-cyan-500 font-bold ml-4">Cancel</a>
-            <button type="button" id="deleteButton" class="btn btn-danger ml-auto">Delete Team</button>
+            <button type="button" id="deleteButton" class="font-bold py-2 px-4 rounded bg-red-500 text-white border-2 border-red-600 hover:bg-red-600 active:ring ml-auto">Delete Team</button>
         </div>
         </form>
     </div>
