@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% load crispy_forms_tags %}
+{% load tailwind_forms %}
 
 {% block title %}{% trans "Complete Your Profile" %}{% endblock %}
 
@@ -16,7 +16,8 @@
                     <p>{% trans "Please set a new password to complete your account setup." %}</p>
                     <form method="post">
                         {% csrf_token %}
-                        {{ form|crispy }}
+                        {% tailwind_formfield form.new_password1 %}
+                        {% tailwind_formfield form.new_password2 %}
                         <button type="submit" class="btn btn-primary">{% trans "Set Password and Continue" %}</button>
                     </form>
                 </div>
