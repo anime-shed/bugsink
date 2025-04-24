@@ -58,6 +58,50 @@ class UserCreationForm(BaseUserCreationForm):
                 urllib.parse.quote(escape(self.cleaned_data['username'])) + '">request it again</a></b>.'))
         return self.cleaned_data['username']
 
+
+class CompleteOnboardingForm(forms.ModelForm):
+    new_password1 = forms.CharField(
+        label=_("New password"),
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+        strip=False,
+        help_text=password_validation.password_validators_help_text_html(),
+    )
+    new_password2 = forms.CharField(
+        label=_("New password confirmation"),
+        strip=False,
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+    )
+
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name')
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+        # Ensure fields are marked as required if they are blank=False in the model
+        if not User._meta.get_field('first_name').blank:
+            self.fields['first_name'].required = True
+        if not User._meta.get_field('last_name').blank:
+            self.fields['last_name'].required = True
+
+    def clean_new_password2(self):
+        password = self.cleaned_data.get("new_password1")
+        password2 = self.cleaned_data.get("new_password2")
+        if password and password2 and password != password2:
+            raise ValidationError(_("The two password fields didn't match."))
+        return password2
+
+    def save(self, commit=True):
+        password = self.cleaned_data["new_password1"]
+        self.user.set_password(password)
+        # Save first_name and last_name from the form to the user instance
+        self.user.first_name = self.cleaned_data['first_name']
+        self.user.last_name = self.cleaned_data['last_name']
+        if commit:
+            self.user.save()
+        return self.user
+
     def _post_clean(self):
         # copy of django.contrib.auth.forms.UserCreationForm._post_clean; but with password1 instead of password2; I'd
         # say it's better UX to complain where the original error is made
@@ -99,6 +143,50 @@ class UserEditForm(ModelForm):
         if User.objects.exclude(pk=self.instance.pk).filter(username=self.cleaned_data['username']).exists():
             raise ValidationError(mark_safe("This email is already registered by another user."))
         return self.cleaned_data['username']
+
+
+class CompleteOnboardingForm(forms.ModelForm):
+    new_password1 = forms.CharField(
+        label=_("New password"),
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+        strip=False,
+        help_text=password_validation.password_validators_help_text_html(),
+    )
+    new_password2 = forms.CharField(
+        label=_("New password confirmation"),
+        strip=False,
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+    )
+
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name')
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+        # Ensure fields are marked as required if they are blank=False in the model
+        if not User._meta.get_field('first_name').blank:
+            self.fields['first_name'].required = True
+        if not User._meta.get_field('last_name').blank:
+            self.fields['last_name'].required = True
+
+    def clean_new_password2(self):
+        password = self.cleaned_data.get("new_password1")
+        password2 = self.cleaned_data.get("new_password2")
+        if password and password2 and password != password2:
+            raise ValidationError(_("The two password fields didn't match."))
+        return password2
+
+    def save(self, commit=True):
+        password = self.cleaned_data["new_password1"]
+        self.user.set_password(password)
+        # Save first_name and last_name from the form to the user instance
+        self.user.first_name = self.cleaned_data['first_name']
+        self.user.last_name = self.cleaned_data['last_name']
+        if commit:
+            self.user.save()
+        return self.user
 
     def save(self, **kwargs):
         commit = kwargs.pop("commit", True)

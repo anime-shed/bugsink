@@ -12,7 +12,7 @@ from bugsink.app_settings import get_settings, CB_ANYBODY
 from bugsink.decorators import atomic_for_request_method
 
 from .forms import (
-    UserCreationForm, ResendConfirmationForm, RequestPasswordResetForm, SetPasswordForm, PreferencesForm, UserEditForm)
+    UserCreationForm, ResendConfirmationForm, RequestPasswordResetForm, SetPasswordForm, PreferencesForm, UserEditForm, CompleteOnboardingForm)
 from .models import EmailVerification
 from django.contrib.auth import views as auth_views
 from django.urls import reverse_lazy
@@ -142,20 +142,22 @@ def complete_onboarding(request):
         return redirect('home')
 
     if request.method == 'POST':
-        # Use SetPasswordForm to enforce password rules
-        # We could create a combined form if other fields (like first/last name) are required
-        form = SetPasswordForm(user, request.POST)
+        # Use CompleteOnboardingForm to handle password, first name, and last name
+        form = CompleteOnboardingForm(user, request.POST)
         if form.is_valid():
-            form.save() # Saves the new password
+            user = form.save() # Saves password and profile info
             user.needs_onboarding = False
-            user.save(update_fields=['needs_onboarding'])
+            user.profile_complete = True # Mark profile as complete
+            user.save(update_fields=['needs_onboarding', 'profile_complete'])
             messages.success(request, 'Your profile has been updated successfully.')
             # Log the user in again with the new password session if needed, though SetPasswordForm might handle this.
             # Re-login might be necessary depending on how session invalidation works with password changes.
             login(request, user) # Ensure user stays logged in
             return redirect('home') # Redirect to home page after successful onboarding
     else:
-        form = SetPasswordForm(user)
+        # Pass initial data if needed, e.g., pre-fill names if they exist
+        initial_data = {'first_name': user.first_name, 'last_name': user.last_name}
+        form = CompleteOnboardingForm(user, initial=initial_data)
 
     return render(request, 'users/complete_onboarding.html', {'form': form})
 
@@ -294,7 +296,9 @@ def reset_password(request, token=None):
             return redirect(next_url)
 
     else:
-        form = SetPasswordForm(user)
+        # Pass initial data if needed, e.g., pre-fill names if they exist
+        initial_data = {'first_name': user.first_name, 'last_name': user.last_name}
+        form = CompleteOnboardingForm(user, initial=initial_data)
 
     return render(request, "users/reset_password.html", {"form": form, "next": next_url})
 
