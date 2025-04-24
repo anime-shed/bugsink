@@ -105,8 +105,6 @@ def add_user(request):
                 is_active=True, # User is active immediately
                 needs_onboarding=True # User needs to set their own password
             )
-            user.profile_complete = False # Set profile_complete after creation
-            user.save() # Save the user object with the new field value
             messages.success(request, f'User {email} created successfully. Temporary password: {temp_password}')
             return redirect('user_list')
     else:
