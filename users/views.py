@@ -14,6 +14,13 @@ from bugsink.decorators import atomic_for_request_method
 from .forms import (
     UserCreationForm, ResendConfirmationForm, RequestPasswordResetForm, SetPasswordForm, PreferencesForm, UserEditForm)
 from .models import EmailVerification
+from django.contrib.auth import views as auth_views
+from django.urls import reverse_lazy
+
+from django.contrib.auth import login, update_session_auth_hash # Import update_session_auth_hash
+from django.contrib.auth import views as auth_views
+from django.urls import reverse_lazy
+
 from .tasks import send_confirm_email, send_reset_email
 
 
@@ -74,6 +81,53 @@ def user_edit(request, user_pk):
         form = UserEditForm(instance=user)
 
     return render(request, "users/user_edit.html", {"form": form})
+
+
+# Custom Login View to handle onboarding redirection
+def custom_login(request, *args, **kwargs):
+    if request.user.is_authenticated and request.user.needs_onboarding:
+        # If user is already logged in but needs onboarding, redirect them immediately
+        return redirect('complete_onboarding')
+
+    response = auth_views.LoginView.as_view(template_name="bugsink/login.html")(request, *args, **kwargs)
+
+    # Check if login was successful and user needs onboarding
+    if request.user.is_authenticated and request.user.needs_onboarding:
+        # Clear any messages set by LoginView (like success message)
+        storage = messages.get_messages(request)
+        storage.used = True
+        # Redirect to onboarding page
+        messages.info(request, 'Please complete your profile and set a new password.')
+        return redirect('complete_onboarding')
+
+    return response
+
+
+@login_required
+@atomic_for_request_method
+def complete_onboarding(request):
+    user = request.user
+    if not user.needs_onboarding:
+        # If user somehow lands here but doesn't need onboarding, redirect them home.
+        return redirect('home')
+
+    if request.method == 'POST':
+        # Use SetPasswordForm to enforce password rules
+        # We could create a combined form if other fields (like first/last name) are required
+        form = SetPasswordForm(user, request.POST)
+        if form.is_valid():
+            form.save() # Saves the new password
+            user.needs_onboarding = False
+            user.save(update_fields=['needs_onboarding'])
+            messages.success(request, 'Your profile has been updated successfully.')
+            # Log the user in again with the new password session if needed, though SetPasswordForm might handle this.
+            # Re-login might be necessary depending on how session invalidation works with password changes.
+            login(request, user) # Ensure user stays logged in
+            return redirect('home') # Redirect to home page after successful onboarding
+    else:
+        form = SetPasswordForm(user)
+
+    return render(request, 'users/complete_onboarding.html', {'form': form})
 
 
 @atomic_for_request_method

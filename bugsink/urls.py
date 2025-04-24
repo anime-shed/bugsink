@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 from django.contrib.auth import views as auth_views
+from users.views import custom_login # Import the custom login view
 from django.views.generic import RedirectView
 
 from alerts.views import debug_email as debug_alerts_email
@@ -32,7 +33,7 @@ urlpatterns = [
     path("accounts/request-reset-password/", request_reset_password, name="request_reset_password"),
     path("accounts/reset-password/<str:token>/", reset_password, name="reset_password"),
 
-    path("accounts/login/", auth_views.LoginView.as_view(template_name="bugsink/login.html"), name="login"),
+    path("accounts/login/", custom_login, name="login"), # Use the custom login view
     path("accounts/logout/", auth_views.LogoutView.as_view(template_name="users/logged_out.html"), name="logout"),
 
     path("accounts/preferences/", preferences, name="preferences"),

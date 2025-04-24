@@ -16,6 +16,7 @@ class User(AbstractUser):
     # later)
 
     send_email_alerts = models.BooleanField(default=True, blank=True)
+    needs_onboarding = models.BooleanField(default=False, blank=True) # Added field to track onboarding status
 
     class Meta:
         db_table = 'auth_user'
