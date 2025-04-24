@@ -113,6 +113,16 @@ class ResendConfirmationForm(forms.Form):
     email = forms.EmailField()
 
 
+class AddUserForm(forms.Form):
+    email = forms.EmailField(label="Email", help_text="Enter the email address for the new user.")
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.filter(username=email).exists():
+            raise ValidationError("A user with this email address already exists.")
+        return email
+
+
 class RequestPasswordResetForm(forms.Form):
     email = forms.EmailField()
 

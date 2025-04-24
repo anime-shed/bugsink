@@ -43,12 +43,11 @@
         <div class="flex">
             <h1 class="text-4xl mt-4 font-bold">Users</h1>
 
-            {% comment %}
-            Our current invite-system is tied to either a team or a project; no "global" invites (yet).
+            {% if request.user.is_superuser %}
             <div class="ml-auto mt-6">
-                <a class="font-bold text-slate-800 border-slate-500 pl-4 pr-4 pb-2 pt-2 ml-1 border-2 bg-cyan-200 hover:bg-cyan-400 active:ring rounded-md" href="{% url "team_members_invite" team_pk=team.pk %}">Invite Member</a>
+                <a class="font-bold text-slate-800 border-slate-500 pl-4 pr-4 pb-2 pt-2 ml-1 border-2 bg-cyan-200 hover:bg-cyan-400 active:ring rounded-md" href="{% url 'user_add' %}">Add User</a>
             </div>
-            {% endcomment %}
+            {% endif %}
         </div>
 
         <div>

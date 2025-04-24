@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+{% load tailwind_forms %}
+
+{% block title %}Add User · {{ site_title }}{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-center">
+
+    <div class="m-4 max-w-4xl flex-auto">
+        <form action="." method="post">
+        {% csrf_token %}
+
+        {% if messages %}
+        <ul class="mb-4">
+            {% for message in messages %}
+                {# if we introduce different levels we can use{% message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %} #}
+                <li class="bg-cyan-50 border-2 border-cyan-800 p-4 rounded-lg">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <div>
+            <h1 class="text-4xl my-4 font-bold">Add New User</h1>
+        </div>
+
+        <div class="mt-4 mb-4">
+            Enter the email address for the new user. They will be created with a temporary password.
+        </div>
+
+        {% tailwind_formfield_implicit form.email %}
+
+        <button name="action" value="add" class="font-bold text-slate-800 border-slate-500 pl-4 pr-4 pb-2 pt-2 border-2 bg-cyan-200 hover:bg-cyan-400 active:ring rounded-md">Add User</button>
+        <a href="{% url "user_list" %}" class="font-bold text-slate-500 ml-4">Cancel</a>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

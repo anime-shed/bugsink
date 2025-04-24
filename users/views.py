@@ -22,6 +22,10 @@ from django.contrib.auth import views as auth_views
 from django.urls import reverse_lazy
 
 from .tasks import send_confirm_email, send_reset_email
+from .forms import AddUserForm # Import the new form
+from django.contrib.auth.hashers import make_password
+import secrets
+import string
 
 
 User = get_user_model()
@@ -81,6 +85,32 @@ def user_edit(request, user_pk):
         form = UserEditForm(instance=user)
 
     return render(request, "users/user_edit.html", {"form": form})
+
+
+@atomic_for_request_method
+@user_passes_test(lambda u: u.is_superuser)
+def add_user(request):
+    if request.method == 'POST':
+        form = AddUserForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            # Generate a secure temporary password
+            alphabet = string.ascii_letters + string.digits + string.punctuation
+            temp_password = ''.join(secrets.choice(alphabet) for i in range(12)) # 12-character password
+
+            user = User.objects.create(
+                username=email,
+                email=email,
+                password=make_password(temp_password), # Hash the password
+                is_active=True, # User is active immediately
+                needs_onboarding=True # User needs to set their own password
+            )
+            messages.success(request, f'User {email} created successfully. Temporary password: {temp_password}')
+            return redirect('user_list')
+    else:
+        form = AddUserForm()
+
+    return render(request, 'users/add_user.html', {'form': form})
 
 
 # Custom Login View to handle onboarding redirection

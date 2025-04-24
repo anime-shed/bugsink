@@ -32,16 +32,9 @@ class UserAdmin(BaseUserAdmin):
                     user.is_active = True # User must be active to login
                     user.save()
 
-                    # Send welcome email with temporary password
-                    # Note: Sending passwords via email is generally discouraged for security reasons.
-                    # Consider sending a password reset link instead in a real-world scenario.
-                    reason = f"An administrator has created an account for you. Your temporary password is: {password}"
-                    verification = EmailVerification.objects.create(user=user, email=user.email)
-                    # Assuming send_welcome_email task can handle a 'reason' with the password
-                    # We might need to adjust the task later if it expects only a token link.
-                    send_welcome_email.delay(user.email, verification.token, reason)
-
-                    messages.success(request, _('The user was added successfully. A welcome email has been sent.'))
+                    # Email sending logic removed.
+                    # Display the temporary password directly to the admin.
+                    messages.success(request, _(f'The user {email} was added successfully. Temporary password: {password}'))
                     return self.response_post_save_add(request, user)
         else:
             form = self.get_form(request)()
