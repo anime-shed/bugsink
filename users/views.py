@@ -103,7 +103,8 @@ def add_user(request):
                 email=email,
                 password=make_password(temp_password), # Hash the password
                 is_active=True, # User is active immediately
-                needs_onboarding=True # User needs to set their own password
+                needs_onboarding=True, # User needs to set their own password
+                profile_complete=False # Explicitly set profile_complete
             )
             messages.success(request, f'User {email} created successfully. Temporary password: {temp_password}')
             return redirect('user_list')
