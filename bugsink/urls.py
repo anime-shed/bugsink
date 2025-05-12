@@ -16,6 +16,7 @@ from files.views import chunk_upload, artifact_bundle_assemble
 
 from .views import home, trigger_error, favicon, settings_view, silence_email_system_warning, counts
 from .debug_views import csrf_debug
+from .health import liveness_probe, readiness_probe, health_check
 
 
 admin.site.site_header = get_settings().SITE_TITLE
@@ -25,6 +26,11 @@ admin.site.index_title = "Admin"  # everyone calls this the "admin" anyway. Let'
 
 urlpatterns = [
     path('', home, name='home'),
+    
+    # Kubernetes health check endpoints
+    path('health/live/', liveness_probe, name='liveness_probe'),
+    path('health/ready/', readiness_probe, name='readiness_probe'),
+    path('health/', health_check, name='health_check'),
 
     path("accounts/signup/", signup, name="signup"),
     path("accounts/resend-confirmation/", resend_confirmation, name="resend_confirmation"),

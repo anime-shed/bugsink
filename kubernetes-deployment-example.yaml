@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bugsink
+  labels:
+    app: bugsink
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bugsink
+  template:
+    metadata:
+      labels:
+        app: bugsink
+    spec:
+      containers:
+      - name: bugsink
+        image: bugsink:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_PATH
+          value: "/data/db.sqlite3"
+        - name: SNAPPEA_DATABASE_PATH
+          value: "/data/snappea.sqlite3"
+        - name: DJANGO_SETTINGS_MODULE
+          value: "bugsink_conf"
+        # Add other environment variables as needed
+        
+        # Liveness probe - checks if the application is running
+        livenessProbe:
+          httpGet:
+            path: /health/live/
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        # Readiness probe - checks if the application is ready to serve traffic
+        readinessProbe:
+          httpGet:
+            path: /health/ready/
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        # Volume mounts for persistent data
+        volumeMounts:
+        - name: bugsink-data
+          mountPath: /data
+      
+      # Volumes for persistent data
+      volumes:
+      - name: bugsink-data
+        persistentVolumeClaim:
+          claimName: bugsink-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bugsink
+spec:
+  selector:
+    app: bugsink
+  ports:
+  - port: 80
+    targetPort: 8000
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bugsink-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

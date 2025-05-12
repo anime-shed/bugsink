@@ -25,8 +25,8 @@ ENV PORT=8000
 
 WORKDIR /app
 
-# mysqlclient dependencies; needed here too, because the built wheel depends on .o files
-RUN apt update && apt install default-libmysqlclient-dev -y
+# Install dependencies
+RUN apt update && apt install default-libmysqlclient-dev curl -y
 
 COPY --from=build /wheels /wheels
 
@@ -48,5 +48,9 @@ RUN apt update && apt install -y git
 RUN pip install -e .
 
 RUN ["bugsink-manage", "migrate", "snappea", "--database=snappea"]
+
+# Add health check for Docker
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:$PORT/health/live/ || exit 1
 
 CMD [ "monofy", "bugsink-manage", "check", "--deploy", "--fail-level", "WARNING", "&&", "bugsink-manage", "migrate", "&&", "bugsink-manage", "prestart", "&&", "gunicorn", "--bind=0.0.0.0:$PORT", "--workers=10", "--access-logfile", "-", "bugsink.wsgi", "|||", "bugsink-runsnappea"]
