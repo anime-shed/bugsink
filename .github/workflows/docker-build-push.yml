@@ -1,0 +1,45 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches: [ "deploy" ]
+  pull_request:
+    branches: [ "deploy" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+      attestations: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        id: build  # Add an ID to this step
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile  # Adjust if your Dockerfile has a different name or path
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/bugsink:latest
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Generate artifact attestation
+        id: attest
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/${{ github.repository }}/bugsink
+          subject-digest: ${{ steps.build.outputs.digest }}  # Reference the digest output
+          push-to-registry: true
