@@ -34,6 +34,9 @@ class ContentEncodingCheckMiddleware:
         "ingest-store",
         "ingest-envelope",
         "ingest-minidump",
+        "ingest-store-no-slash",
+        "ingest-envelope-no-slash",
+        "ingest-minidump-no-slash",
 
         "api_catch_all",
     ]
