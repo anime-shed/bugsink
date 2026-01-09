@@ -1,7 +1,7 @@
 import os
 from urllib.parse import urlparse
 
-from bugsink.conf_utils import deduce_allowed_hosts, eat_your_own_dogfood, deduce_script_name
+from bugsink.conf_utils import deduce_allowed_hosts, eat_your_own_dogfood, deduce_script_name, int_or_none
 
 from bugsink.settings.default import *  # noqa
 from bugsink.settings.default import DATABASES
@@ -174,7 +174,7 @@ BUGSINK = {
     "MAX_EVENTS_PER_MONTH": int(os.getenv("MAX_EVENTS_PER_MONTH", 1_000_000)),
 
     "MAX_RETENTION_PER_PROJECT_EVENT_COUNT": int_or_none(os.getenv("MAX_RETENTION_PER_PROJECT_EVENT_COUNT", None)),
-    "MAX_RETENTION_EVENT_COUNT": int_or_none(os.getenv("MAX_RETENTION_EVENT_COUNT"), None),
+    "MAX_RETENTION_EVENT_COUNT": int_or_none(os.getenv("MAX_RETENTION_EVENT_COUNT", None)),
 
     # Settings that help with debugging and development ("why isn't Bugsink doing what I expect?")
     "VALIDATE_ON_DIGEST": os.getenv("VALIDATE_ON_DIGEST", "none").lower(),  # other legal values are "warn" and "strict"
@@ -189,7 +189,7 @@ BUGSINK = {
     "PHONEHOME": os.getenv("PHONEHOME", "true").lower() in ("true", "1", "yes"),
 
     # Feature flags
-    "FEATURE_MINIDUMPS": os.getenv("PHONEHOME", "false").lower() in ("true", "1", "yes"),
+    "FEATURE_MINIDUMPS": os.getenv("FEATURE_MINIDUMPS", "false").lower() in ("true", "1", "yes"),
 }
 
 
